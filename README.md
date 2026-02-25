@@ -1,6 +1,7 @@
-# Ai-Resume-Analyzer
+# AI Resume Analyzer
+
 <p align="center">
-  <img src="./Logo.png" width="120"/>
+  <img src="Logo.png" width="120"/>
 </p>
 
 <h1 align="center">🤖 AI Resume Analyzer</h1>
@@ -35,11 +36,13 @@ AI Resume Analyzer is a modern full-stack web application that:
 
 ## 🎥 Demo Preview
 
-<p align="center">
-  <video src="./text.mp4" width="800" controls></video>
-</p>
+⚠ GitHub does not properly render MP4 video previews.
 
-> ⚠️ If GitHub does not show the video preview, download and watch locally.
+You can download and watch locally:
+
+[text.mp4](text.mp4)
+
+👉 Recommended: Convert `text.mp4` to `demo.gif` for better GitHub preview support.
 
 ---
 
@@ -47,12 +50,12 @@ AI Resume Analyzer is a modern full-stack web application that:
 
 ### 🔹 Upload Interface
 <p align="center">
-  <img src="./Test Images/background1.png" width="800"/>
+  <img src="Test%20Images/background1.png" width="800"/>
 </p>
 
 ### 🔹 Result Dashboard
 <p align="center">
-  <img src="./Test Images/background2.png" width="800"/>
+  <img src="Test%20Images/background2.png" width="800"/>
 </p>
 
 ---
@@ -77,6 +80,7 @@ AI Resume Analyzer is a modern full-stack web application that:
 ---
 
 ## 📂 Project Structure
+
 
 ai-resume-analyzer/
 │
@@ -105,12 +109,13 @@ ai-resume-analyzer/
 
 ```bash
 git clone https://github.com/HiteshArya10/Ai-Resume-Analyzer
-cd ai-resume-analyzer
+cd Ai-Resume-Analyzer
 pip install -r requirements.txt
 python app.py
 
-http://127.0.0.1:5000
+Then open:
 
+http://127.0.0.1:5000
 🎯 Future Improvements
 
 🔥 NLP similarity scoring (TF-IDF / spaCy)
@@ -134,24 +139,3 @@ AI/ML & Full Stack Developer
 📧 hiteshchourasia001@gmail.com
 
 ⭐ If you like this project, consider giving it a star!
-
-
----
-
-🔥 Important Note About Folder Name
-
-Because your folder name is:
-
-
-Test Images
-
-
-GitHub supports spaces, but if it causes issue, better rename it to:
-
-
-test-images
-
-
-Then update README path to:
-
-
