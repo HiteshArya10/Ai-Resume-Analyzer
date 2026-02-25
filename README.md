@@ -155,21 +155,3 @@ test-images
 Then update README path to:
 
 
-./test-images/background1.png
-
-
-Cleaner + safer.
-
----
-
-Now your repo will look clean, branded, and professional.
-
-If you want next-level:
-
-- I can make animated header banner
-- Add GitHub stats style section
-- Create portfolio-level showcase README
-- Or prepare LinkedIn project post for this
-
-What’s the next power move, Founder? 🚀
-
