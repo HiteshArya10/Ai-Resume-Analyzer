@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Resume Analyzer</title>
+    <style>
+        :root {
+            --bg0: #05070b;
+            --bg1: #071018;
+            --card: rgba(18, 25, 40, 0.72);
+            --card2: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: rgba(255, 255, 255, 0.92);
+            --muted: rgba(255, 255, 255, 0.72);
+            --muted2: rgba(255, 255, 255, 0.55);
+            --accent: #38bdf8;
+            --accent2: #a78bfa;
+            --good: #22c55e;
+            --warn: #f59e0b;
+            --danger: #fb7185;
+            --shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+            --radius: 20px;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            color: var(--text);
+            background:
+                radial-gradient(900px 500px at 10% 15%, rgba(56, 189, 248, 0.22), transparent 60%),
+                radial-gradient(800px 420px at 80% 30%, rgba(167, 139, 250, 0.18), transparent 65%),
+                radial-gradient(900px 600px at 50% 100%, rgba(34, 197, 94, 0.10), transparent 60%),
+                linear-gradient(180deg, var(--bg0), var(--bg1)),
+                url('{{ url_for("static", filename="bg_cool.png") }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: grid;
+            place-items: center;
+            padding: 28px 16px;
+        }
+
+        .shell {
+            width: min(980px, 100%);
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--card), rgba(18, 25, 40, 0.58));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(167, 139, 250, 0.22), rgba(34, 197, 94, 0.14));
+            opacity: 0.55;
+            pointer-events: none;
+            mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+            -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+            padding: 1px;
+            border-radius: var(--radius);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        .card-inner {
+            padding: 26px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        .brand-right {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .hitsanx {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .hitsanx img {
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .footer {
+            width: min(980px, 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 12px;
+            padding: 6px 0 2px;
+            user-select: none;
+        }
+
+        .footer img {
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .footer b { color: rgba(255, 255, 255, 0.78); }
+
+        .footer a {
+            color: rgba(248, 250, 252, 0.9);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background:
+                radial-gradient(12px 12px at 30% 35%, rgba(255,255,255,0.6), transparent 65%),
+                linear-gradient(135deg, rgba(56, 189, 248, 0.95), rgba(167, 139, 250, 0.92));
+            box-shadow: 0 14px 40px rgba(56, 189, 248, 0.22);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sub {
+            margin: 8px 0 18px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--muted);
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            white-space: nowrap;
+        }
+
+        .pill b {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        form { margin: 0; }
+
+        .drop {
+            border: 1px dashed rgba(255, 255, 255, 0.26);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 18px;
+            display: grid;
+            gap: 10px;
+            transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+        }
+
+        .drop.is-dragover {
+            border-color: rgba(56, 189, 248, 0.75);
+            background: rgba(56, 189, 248, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .drop-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .drop h2 {
+            margin: 0;
+            font-size: 15px;
+            letter-spacing: -0.01em;
+        }
+
+        .hint {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--muted2);
+        }
+
+        .file-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: var(--muted);
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1 1 260px;
+        }
+
+        .btns {
+            display: inline-flex;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font-weight: 700;
+            padding: 10px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+        }
+
+        .btn:active { transform: translateY(1px); }
+
+        .btn:hover {
+            border-color: rgba(56, 189, 248, 0.40);
+            background: rgba(56, 189, 248, 0.08);
+            box-shadow: 0 18px 52px rgba(56, 189, 248, 0.12);
+        }
+
+        .btn.primary {
+            border-color: rgba(56, 189, 248, 0.55);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.92), rgba(167, 139, 250, 0.75));
+            color: rgba(10, 15, 24, 0.95);
+        }
+
+        .btn.primary:hover {
+            border-color: rgba(56, 189, 248, 0.75);
+            box-shadow: 0 18px 60px rgba(167, 139, 250, 0.14), 0 18px 52px rgba(56, 189, 248, 0.14);
+        }
+
+        .btn[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn[disabled]:hover { background: rgba(255, 255, 255, 0.04); border-color: var(--border); }
+
+        input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(10, 15, 24, 0.25);
+            border-top-color: rgba(10, 15, 24, 0.75);
+            border-radius: 999px;
+            display: none;
+            animation: spin 700ms linear infinite;
+        }
+
+        .btn.primary.is-loading .spinner { display: inline-block; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .side {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+        }
+
+        .mini-title {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted2);
+            margin: 0 0 10px;
+        }
+
+        .stat {
+            display: grid;
+            gap: 10px;
+        }
+
+        .profile {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            background:
+                radial-gradient(14px 14px at 30% 35%, rgba(255,255,255,0.55), transparent 65%),
+                linear-gradient(135deg, rgba(56, 189, 248, 0.92), rgba(167, 139, 250, 0.78));
+            display: grid;
+            place-items: center;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            color: rgba(10, 15, 24, 0.92);
+            box-shadow: 0 18px 60px rgba(56, 189, 248, 0.12);
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .p-name {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+
+        .p-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--muted);
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            max-width: 100%;
+        }
+
+        .meta a {
+            color: var(--text);
+            text-decoration: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 240px;
+        }
+
+        .meta a:hover { text-decoration: underline; }
+
+        .score-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .score {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        .score small {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .bar {
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            overflow: hidden;
+        }
+
+        .bar > span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.95), rgba(167, 139, 250, 0.92));
+            border-radius: 999px;
+            transition: width 450ms ease;
+        }
+
+        .bar > span.progress-bar {
+            width: var(--target, 0%);
+            animation: loadBar 1.5s ease-in-out forwards;
+        }
+
+        @keyframes loadBar {
+            from { width: 0%; }
+            to { width: var(--target, 0%); }
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .match-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .match-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .match-row b {
+            font-size: 13px;
+            letter-spacing: -0.01em;
+        }
+
+        .match-row span {
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .mini-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            overflow: hidden;
+        }
+
+        .mini-bar > i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(34, 197, 94, 0.85), rgba(56, 189, 248, 0.90), rgba(167, 139, 250, 0.85));
+            animation: loadMini 1.2s ease-in-out forwards;
+        }
+
+        @keyframes loadMini {
+            from { width: 0%; }
+            to { width: var(--target, 0%); }
+        }
+
+        .strength {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .strength.strong { border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.10); }
+        .strength.moderate { border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.10); }
+        .strength.weak { border-color: rgba(251, 113, 133, 0.35); background: rgba(251, 113, 133, 0.10); }
+
+        .chip {
+            font-size: 12px;
+            color: var(--text);
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .empty {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .tip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 16px;
+            padding: 14px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .tip b { color: var(--text); }
+
+        .jd-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 10px 0 4px;
+        }
+
+        .jd-input {
+            width: 100%;
+            min-height: 90px;
+            max-height: 180px;
+            resize: vertical;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.75);
+            color: var(--text);
+            font-size: 12px;
+            padding: 10px 12px;
+            outline: none;
+        }
+
+        .jd-input::placeholder {
+            color: var(--muted2);
+        }
+
+        .jd-input:focus {
+            border-color: rgba(56, 189, 248, 0.7);
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+        }
+
+        @media (max-width: 860px) {
+            .shell { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+    <div class="card">
+        <div class="card-inner">
+            <div class="title-row">
+                <div class="brand">
+                    <div class="logo" aria-hidden="true">AI</div>
+                    <div style="min-width:0">
+                        <h1>AI Resume Analyzer</h1>
+                        <div class="sub">Upload your resume PDF to detect skills and generate a quick score. Optimized for fast feedback.</div>
+                    </div>
+                </div>
+                <div class="brand-right">
+                    <div class="hitsanx" title="Made by HitsanX">
+                        <img src="{{ url_for('static', filename='hitsanx.png') }}" alt="HitsanX logo">
+                        <span>HitsanX</span>
+                    </div>
+                    <div class="pill"><span aria-hidden="true">📄</span> <b>PDF only</b></div>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="form">
+                <div class="drop" id="drop">
+                    <div class="drop-top">
+                        <div>
+                            <h2>Drop your resume here</h2>
+                            <p class="hint">Or choose a file from your computer. We never store it permanently.</p>
+                        </div>
+                        <div class="pill"><span aria-hidden="true">⚡</span> Fast analyze</div>
+                    </div>
+
+                    <input id="resume" type="file" name="resume" accept="application/pdf" required>
+                    <input id="photo" type="file" name="photo" accept="image/*">
+
+                    <div class="file-row">
+                        <div class="file-name" id="fileName">No file selected</div>
+                        <div class="btns">
+                            <button class="btn" type="button" id="chooseBtn">Choose file</button>
+                            <button class="btn primary" type="submit" id="analyzeBtn" disabled>
+                                <span class="spinner" aria-hidden="true"></span>
+                                <span id="analyzeText">Analyze</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="file-row" style="margin-top: 8px;">
+                        <div class="file-name" id="photoName">No profile photo (optional)</div>
+                        <div class="btns">
+                            <button class="btn" type="button" id="photoBtn">Add photo</button>
+                        </div>
+                    </div>
+
+                    <label class="jd-label" for="job_description">Paste job description (optional)</label>
+                    <textarea id="job_description" name="job_description" class="jd-input" placeholder="Paste the job description here to see how well this resume matches it."></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="side">
+        <div class="card">
+            <div class="card-inner stat">
+                <p class="mini-title">Results</p>
+
+                {% if score is not none %}
+                    {% set display_name = (details.name if details and details.name else 'Candidate') %}
+                    {% set name_parts = display_name.split(' ') %}
+                    {% set initials = (name_parts[0][0] ~ (name_parts[1][0] if name_parts|length > 1 else ''))|upper %}
+
+                    <div class="profile" style="margin-bottom: 10px;">
+                        <div class="avatar" aria-hidden="true">
+                            {% if photo_data_url %}
+                                <img src="{{ photo_data_url }}" alt="Profile photo">
+                            {% else %}
+                                {{ initials }}
+                            {% endif %}
+                        </div>
+                        <div style="min-width: 0;">
+                            <p class="p-name">{{ display_name }}</p>
+                            <div class="p-meta">
+                                {% if details and details.email %}
+                                    <span class="meta"><span aria-hidden="true">✉️</span> <a href="mailto:{{ details.email }}">{{ details.email }}</a></span>
+                                {% endif %}
+                                {% if details and details.phone %}
+                                    <span class="meta"><span aria-hidden="true">📞</span> <a href="tel:{{ details.phone|replace(' ', '') }}">{{ details.phone }}</a></span>
+                                {% endif %}
+                                {% if details and details.links and details.links|length > 0 %}
+                                    {% for link in details.links %}
+                                        <span class="meta"><span aria-hidden="true">🔗</span> <a href="{{ link }}" target="_blank" rel="noreferrer noopener">{{ link }}</a></span>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if not details or (not details.email and not details.phone and (not details.links or details.links|length == 0)) %}
+                                    <span class="meta"><span aria-hidden="true">👤</span> <span>Contact details not found</span></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="score-row">
+                        <p class="score">{{ score }}<small>/100</small></p>
+                        {% if score >= 80 %}
+                            <div class="strength strong">🟢 Strong Resume</div>
+                        {% elif score >= 50 %}
+                            <div class="strength moderate">🟡 Moderate</div>
+                        {% else %}
+                            <div class="strength weak">🔴 Needs Improvement</div>
+                        {% endif %}
+                    </div>
+                    <div class="bar" aria-label="Score bar">
+                        <span id="barFill" class="progress-bar" style="--target: {{ score }}%;"></span>
+                    </div>
+
+                    {% if job_match %}
+                        <p class="mini-title" style="margin-top: 14px;">Job match (TF‑IDF)</p>
+                        <div class="score-row" style="margin-bottom: 6px;">
+                            <p class="score">{{ job_match.score }}<small>/100</small></p>
+                            <div class="pill"><span aria-hidden="true">🧠</span> TF‑IDF similarity</div>
+                        </div>
+                    {% endif %}
+
+                    <p class="mini-title" style="margin-top: 14px;">Skill match</p>
+                    {% if skill_matches and skill_matches|length > 0 %}
+                        <div class="match-list">
+                            {% for item in skill_matches %}
+                                <div>
+                                    <div class="match-row">
+                                        <b>{{ item.skill }}</b>
+                                        <span>{{ item.percent }}% match</span>
+                                    </div>
+                                    <div class="mini-bar" aria-label="Skill match bar">
+                                        <i style="--target: {{ item.percent }}%;"></i>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty">No matching skills detected yet. Try adding a “Skills” section or clearer keywords in your PDF.</p>
+                    {% endif %}
+
+                    {% if details and details.keywords and details.keywords|length > 0 %}
+                        <p class="mini-title" style="margin-top: 14px;">AI keywords (spaCy)</p>
+                        <div class="skills">
+                            {% for kw in details.keywords %}
+                                <span class="chip">{{ kw }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="empty">Upload a PDF and click <b>Analyze</b> to see your score and detected skills here.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tip">
+            <b>Pro tip:</b> If your PDF is scanned (image-only), text extraction may fail. Export your resume as a selectable-text PDF for best results.
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <img src="{{ url_for('static', filename='hitsanx.png') }}" alt="HitsanX logo">
+    <span>Made by <b>HitsanX</b> ·
+        <a href="mailto:hiteshchourasia001@gmail.com">hiteshchourasia001@gmail.com</a> ·
+        <a href="https://github.com/HiteshArya10" target="_blank" rel="noreferrer noopener">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/hitesh-chourasia-04a3713a4/" target="_blank" rel="noreferrer noopener">LinkedIn</a>
+    </span>
+</div>
+
+<script>
+    (function () {
+        const input = document.getElementById('resume');
+        const chooseBtn = document.getElementById('chooseBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const analyzeText = document.getElementById('analyzeText');
+        const fileName = document.getElementById('fileName');
+        const photoInput = document.getElementById('photo');
+        const photoBtn = document.getElementById('photoBtn');
+        const photoName = document.getElementById('photoName');
+        const drop = document.getElementById('drop');
+        const form = document.getElementById('form');
+
+        function setFileLabel(file) {
+            if (!file) {
+                fileName.textContent = 'No file selected';
+                analyzeBtn.disabled = true;
+                return;
+            }
+            fileName.textContent = file.name;
+            analyzeBtn.disabled = false;
+        }
+
+        chooseBtn.addEventListener('click', () => input.click());
+        input.addEventListener('change', () => setFileLabel(input.files && input.files[0]));
+
+        photoBtn.addEventListener('click', () => photoInput.click());
+        photoInput.addEventListener('change', () => {
+            const f = photoInput.files && photoInput.files[0];
+            photoName.textContent = f ? f.name : 'No profile photo (optional)';
+        });
+
+        ;['dragenter', 'dragover'].forEach(evt => {
+            drop.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                drop.classList.add('is-dragover');
+            });
+        });
+        ;['dragleave', 'drop'].forEach(evt => {
+            drop.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                drop.classList.remove('is-dragover');
+            });
+        });
+        drop.addEventListener('drop', (e) => {
+            const files = e.dataTransfer && e.dataTransfer.files;
+            if (!files || !files.length) return;
+            input.files = files;
+            setFileLabel(files[0]);
+        });
+
+        let submitted = false;
+        form.addEventListener('submit', (e) => {
+            if (submitted) return;
+            e.preventDefault();
+            analyzeBtn.classList.add('is-loading');
+            analyzeBtn.disabled = true;
+            chooseBtn.disabled = true;
+            photoBtn.disabled = true;
+            analyzeText.textContent = 'Analyzing…';
+            submitted = true;
+            setTimeout(() => form.submit(), 1000);
+        });
+    })();
+</script>
+
+</body>
+</html>
