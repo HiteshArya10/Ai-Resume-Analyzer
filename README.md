@@ -104,7 +104,7 @@ ai-resume-analyzer/
 ## ⚡ Run Locally
 
 ```bash
-git clone https://github.com/yourusername/ai-resume-analyzer.git
+git clone https://github.com/HiteshArya10/Ai-Resume-Analyzer
 cd ai-resume-analyzer
 pip install -r requirements.txt
 python app.py
