@@ -1,7 +1,7 @@
 # AI Resume Analyzer
 
 <p align="center">
-  <img src="Logo.png" width="120"/>
+  <img src="test-images/logo.png" width="120"/>
 </p>
 
 <h1 align="center">🤖 AI Resume Analyzer</h1>
@@ -36,13 +36,9 @@ AI Resume Analyzer is a modern full-stack web application that:
 
 ## 🎥 Demo Preview
 
-⚠ GitHub does not properly render MP4 video previews.
-
-You can download and watch locally:
-
-[text.mp4](text.mp4)
-
-👉 Recommended: Convert `text.mp4` to `demo.gif` for better GitHub preview support.
+<p align="center">
+  <img src="test-images/demo.gif" width="800"/>
+</p>
 
 ---
 
@@ -50,12 +46,12 @@ You can download and watch locally:
 
 ### 🔹 Upload Interface
 <p align="center">
-  <img src="Test%20Images/background1.png" width="800"/>
+  <img src="test-images/upload-ui.png" width="800"/>
 </p>
 
 ### 🔹 Result Dashboard
 <p align="center">
-  <img src="Test%20Images/background2.png" width="800"/>
+  <img src="test-images/result-dashboard.png" width="800"/>
 </p>
 
 ---
@@ -63,26 +59,26 @@ You can download and watch locally:
 ## 🛠 Tech Stack
 
 ### 💻 Frontend
-- HTML5
-- CSS3 (Custom Modern UI)
-- JavaScript
+- HTML5  
+- CSS3 (Custom Modern UI)  
+- JavaScript  
 
 ### ⚙ Backend
-- Python
-- Flask
+- Python  
+- Flask  
 
 ### 🧠 Processing Logic
-- PDF Text Extraction
-- Skill Detection Engine
-- Resume Scoring Algorithm
-- Job Description Matching
+- PDF Text Extraction  
+- Skill Detection Engine  
+- Resume Scoring Algorithm  
+- Job Description Matching  
 
 ---
 
 ## 📂 Project Structure
 
 
-ai-resume-analyzer/
+Ai-Resume-Analyzer/
 │
 ├── app.py
 ├── resume_analyzer.py
@@ -90,12 +86,11 @@ ai-resume-analyzer/
 ├── Procfile
 ├── runtime.txt
 │
-├── Logo.png
-├── text.mp4
-│
-├── Test Images/
-│ ├── background1.png
-│ ├── background2.png
+├── test-images/
+│ ├── demo.gif
+│ ├── logo.png
+│ ├── upload-ui.png
+│ ├── result-dashboard.png
 │
 ├── templates/
 │ └── index.html
